@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: S3 bucket for holding tfstate and dynamodb for locking
+Resources:
+  EncryptedS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'terraform-state-${AWS::Region}-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+    DeletionPolicy: Delete
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      BillingMode: PAY_PER_REQUEST
+      TableName: tflock
+      AttributeDefinitions:
+        -
+          AttributeName: "LockID"
+          AttributeType: "S"
+      KeySchema:
+        - 
+          AttributeName: "LockID"
+          KeyType: "HASH"
